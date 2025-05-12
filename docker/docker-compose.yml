@@ -12,7 +12,7 @@ services:
       - MOBSF_AUTO_SCAN=true
     volumes:
       - mobsf_data:/home/mobsf/.MobSF
-      - ../source:/home/mobsf/uploads:rw
+      - ./source:/home/mobsf/uploads:rw
     user: root
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000"]
@@ -26,9 +26,9 @@ services:
       context: ./scanner
       dockerfile: Dockerfile
     volumes:
-      - ../source:/app/source:rw
-      - ../results:/results:rw
-      - ../reports:/app/reports:rw
+      - ./source:/app/source:rw
+      - ./results:/results:rw
+      - ./reports:/app/reports:rw
     environment:
       - MOBSF_API_KEY=${MOBSF_API_KEY}
       - MOBSF_HOST=http://mobsf:8000
