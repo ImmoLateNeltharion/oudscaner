@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Отчёт о безопасности мобильного приложения</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 40px;
+            color: #333;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 20px;
+        }
+        
+        .score {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 20px 0;
+        }
+        
+        .score-high {
+            color: #27ae60;
+        }
+        
+        .score-medium {
+            color: #f39c12;
+        }
+        
+        .score-low {
+            color: #e74c3c;
+        }
+        
+        .section {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 5px;
+        }
+        
+        .vulnerability {
+            margin: 15px 0;
+            padding: 15px;
+            border-left: 4px solid #e74c3c;
+            background: #fff;
+        }
+        
+        .vulnerability.critical {
+            border-left-color: #c0392b;
+        }
+        
+        .vulnerability.high {
+            border-left-color: #e74c3c;
+        }
+        
+        .vulnerability.medium {
+            border-left-color: #f39c12;
+        }
+        
+        .vulnerability.low {
+            border-left-color: #3498db;
+        }
+        
+        .recommendations {
+            background: #e8f4f8;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background-color: #f5f5f5;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Отчёт о безопасности мобильного приложения</h1>
+        <p>Приложение: {{ report.app_name }}</p>
+        <p>Версия: {{ report.version }}</p>
+        <p>Дата анализа: {{ report.scan_date.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+    </div>
+
+    <div class="score {% if report.security_score.overall_score >= 80 %}score-high{% elif report.security_score.overall_score >= 60 %}score-medium{% else %}score-low{% endif %}">
+        Общая оценка безопасности: {{ "%.1f"|format(report.security_score.overall_score) }}/100
+    </div>
+
+    <div class="section">
+        <h2>Статистика уязвимостей</h2>
+        <table>
+            <tr>
+                <th>Уровень</th>
+                <th>Количество</th>
+            </tr>
+            <tr>
+                <td>Критические</td>
+                <td>{{ report.security_score.critical_vulnerabilities }}</td>
+            </tr>
+            <tr>
+                <td>Высокий</td>
+                <td>{{ report.security_score.high_vulnerabilities }}</td>
+            </tr>
+            <tr>
+                <td>Средний</td>
+                <td>{{ report.security_score.medium_vulnerabilities }}</td>
+            </tr>
+            <tr>
+                <td>Низкий</td>
+                <td>{{ report.security_score.low_vulnerabilities }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Оценка по категориям</h2>
+        <table>
+            <tr>
+                <th>Категория</th>
+                <th>Балл</th>
+            </tr>
+            {% for category, score in report.security_score.category_scores.items() %}
+            <tr>
+                <td>{{ category }}</td>
+                <td>{{ "%.1f"|format(score) }}/100</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Обнаруженные уязвимости</h2>
+        {% for result in report.scan_results %}
+            <h3>Сканер: {{ result.scanner_name }}</h3>
+            {% for vuln in result.vulnerabilities %}
+            <div class="vulnerability {{ vuln.severity }}">
+                <h4>{{ vuln.title }}</h4>
+                <p><strong>Уровень риска:</strong> {{ vuln.severity }}</p>
+                <p><strong>Описание:</strong> {{ vuln.description }}</p>
+                {% if vuln.location %}
+                <p><strong>Расположение:</strong> {{ vuln.location }}</p>
+                {% endif %}
+                <p><strong>Рекомендация:</strong> {{ vuln.recommendation }}</p>
+            </div>
+            {% endfor %}
+        {% endfor %}
+    </div>
+
+    <div class="recommendations">
+        <h2>Рекомендации</h2>
+        {% for recommendation in report.recommendations %}
+        <p>{{ recommendation }}</p>
+        {% endfor %}
+    </div>
+
+    <div class="footer">
+        <p>Отчёт сгенерирован: {{ generation_date }}</p>
+    </div>
+</body>
+</html> 

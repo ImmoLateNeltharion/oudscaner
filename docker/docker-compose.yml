@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  # MobSF сервер
+  mobsf:
+    image: opensecurity/mobile-security-framework-mobsf:latest
+    ports:
+      - "8003:8000"
+    environment:
+      - MOBSF_API_KEY=${MOBSF_API_KEY}
+      - MOBSF_SKIP_CLEANUP=true
+      - MOBSF_AUTO_SCAN=true
+    volumes:
+      - mobsf_data:/home/mobsf/.MobSF
+      - ../source:/home/mobsf/uploads:rw
+    user: root
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Сканер безопасности
+  scanner:
+    build: 
+      context: ./scanner
+      dockerfile: Dockerfile
+    volumes:
+      - ../source:/app/source:rw
+      - ../results:/results:rw
+      - ../reports:/app/reports:rw
+    environment:
+      - MOBSF_API_KEY=${MOBSF_API_KEY}
+      - MOBSF_HOST=http://mobsf:8000
+      - SCAN_MODE=auto
+      - REPORT_TYPE=all
+    depends_on:
+      mobsf:
+        condition: service_healthy
+    command: ["python", "main.py", "--auto-scan"]
+
+volumes:
+  mobsf_data:
+    driver: local 

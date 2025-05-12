@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  # MobSF сервер
+  mobsf:
+    image: opensecurity/mobile-security-framework-mobsf:latest
+    ports:
+      - "8003:8000"
+    environment:
+      - MOBSF_API_KEY=your_mobsf_api_key
+    volumes:
+      - mobsf_data:/home/mobsf/.MobSF
+
+  # Наш сканер
+  security_scanner:
+    build: .
+    volumes:
+      - ../apk:/app/apk  # директория с APK файлами
+      - ../results:/results  # директория для результатов
+    environment:
+      - MOBSF_API_KEY=your_mobsf_api_key
+      - MOBSF_HOST=http://mobsf:8000
+    depends_on:
+      - mobsf
+
+volumes:
+  mobsf_data: 
